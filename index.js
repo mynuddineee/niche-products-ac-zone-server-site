@@ -22,6 +22,7 @@ async function run(){
         const database = client.db('niche_products');
         const productsCollection = database.collection('airconditions');
         const usersCollection = database.collection('users');
+        const reviewsCollection = database.collection('reviews');
         const ordersCollection = database.collection("orders");
 
         // home product page find 6 products
@@ -54,6 +55,25 @@ async function run(){
             const result = await productsCollection.insertOne(addedProduct);
             res.json(result);
 
+        })
+
+        // Add Review to the db
+
+        app.post('/addReview', async(req,res)=>{
+
+          const addedReview = req.body;
+          const result = await reviewsCollection.insertOne(addedReview);
+          res.json(result);
+
+      })
+
+      // Get Review data from db
+
+        app.get('/reviews', async(req, res) => {
+
+          const cursor = reviewsCollection.find({});
+          const results = await cursor.toArray();
+          res.json(results);
         })
 
 
@@ -176,6 +196,22 @@ async function run(){
           const query = {_id:ObjectId(id)};
           const results = await ordersCollection.deleteOne(query);
           res.json(results);
+      })
+
+      // Update status of order
+
+      app.put('/updateStatus/:id', (req, res) => {
+
+        const id = req.params.id;
+        const updatedStatus = req.body.status;
+        const filter = {_id:ObjectId(id)};
+        ordersCollection.updateOne(filter, {
+          $set: {status:updatedStatus},
+        })
+
+        .then((result) => {
+          res.send(result);
+        });
       })
 
           }
